@@ -38,10 +38,11 @@ This is a project for developing a new baseline model for end-to-end autonomous 
        - It intializes the world,sensors,pygame,agents(and in turn models)
        - It runs the simulation in the pygame loop and then destoys any actors that are present
 
-**In this project we tested without pedestrians to learn the very basic behavorial policies
-  Can be used with pedestrians too
-  In the proposed architecture there was topological planner which is similar to the GlobalRoutePlanner in the basicAgent
-  The end goal of our project is to build a robust model that can beat the localPlanner ,while the the Global route planner acts like oracle dhoeing the route to the agent.
+### Notes
+1. In this project we tested without pedestrians to learn the very basic behavorial policies
+2. It Can be used with pedestrians too
+3. In the proposed architecture there was topological planner which is similar to the GlobalRoutePlanner in the basicAgent
+4. The end goal of our project is to build a robust model that can beat the localPlanner ,while the the Global route planner acts like oracle dhoeing the route to the agent.
 
       
       
