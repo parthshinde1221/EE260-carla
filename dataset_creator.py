@@ -145,7 +145,7 @@ def create_dataset():
     pygame_clock = pygame.time.Clock()
     try:
         i = 0
-        while i < 15000:
+        while i < 1500:
             world.tick()
             pygame_clock.tick_busy_loop(20)
             print(f"{str(i)} frames saved")
@@ -179,7 +179,7 @@ def create_dataset():
 
     pygame.quit()
 
-AGENTS = 10
+AGENTS = 3
 
 for i in range(AGENTS):
     create_dataset()

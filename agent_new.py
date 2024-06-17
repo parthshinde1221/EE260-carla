@@ -4,9 +4,12 @@ import carla  # Import the CARLA simulator API
 from carla import VehicleControl  # Assuming these are the correct class names; please adjust as necessary.
 from agents.navigation.basic_agent import BasicAgent
 # from model_new import CustomXception
+# from model_vit import 
 import torch
 import torch.nn as nn
 import timm
+
+EMBED_DIM = 768
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f'Using device: {device}')
@@ -22,13 +25,50 @@ class CustomXception(nn.Module):
 
     def forward(self, x):
         return self.base_model(x)
+    
+
+# Model definition
+class CustomXceptionViT(nn.Module):
+    def __init__(self):
+        super(CustomXceptionViT, self).__init__()
+        self.xception = timm.create_model('xception', pretrained=True)
+        self.xception.fc = nn.Identity()  # Remove the fully connected layer
+
+        self.projection = nn.Linear(2048, EMBED_DIM)  # Projecting to the ViT's embedding dimension
+
+        self.vit = timm.create_model('vit_base_patch16_224', pretrained=True)
+        self.vit.patch_embed = nn.Identity()  # Remove the patch embedding
+        self.vit.head = nn.Linear(self.vit.head.in_features, 3)  # Adjust the final layer to match the number of outputs
+
+        self.to(device)
+
+    def forward(self, x):
+        # Extract unpooled features from Xception
+        x = self.xception.forward_features(x)  # Shape: [B, 2048, 7, 7]
+        
+        # Flatten the spatial dimensions and project to the Transformer dimension
+        B, C, H, W = x.size()
+        x = x.permute(0, 2, 3, 1).contiguous().view(B, -1, C)  # Shape: [B, 49, 2048]
+        x = self.projection(x)  # Shape: [B, 49, EMBED_DIM]
+
+        # Add classification token and positional embeddings
+        cls_token = self.vit.cls_token.expand(B, -1, -1)  # Shape: [B, 1, EMBED_DIM]
+        x = torch.cat((cls_token, x), dim=1)  # Shape: [B, 50, EMBED_DIM]
+        x = x + self.vit.pos_embed[:, :(x.size(1)), :]  # Shape: [B, 50, EMBED_DIM]
+
+        # Pass through the Transformer
+        x = self.vit.blocks(x)
+        x = self.vit.norm(x)
+        x = self.vit.head(x[:, 0])  # Use the classification token output
+        return x
 
 class ModelAgent(BasicAgent):  # Ensure this inherits from the correct CARLA Agent class.
     def __init__(self,vehicle,model_path):
         super().__init__(vehicle)  # Initialize the superclass if necessary.
-        self.model = CustomXception()
+        # self.model = CustomXception()
+        self.model = CustomXceptionViT()
         self.model.load_state_dict(torch.load(model_path))
-        # self.model.eval()
+        self.model.eval()
         print("Model loaded and set to evaluation mode.")
 
     @staticmethod

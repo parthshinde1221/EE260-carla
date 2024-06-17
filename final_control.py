@@ -79,7 +79,8 @@ actor_list.append(vehicle)
 
 # Create the BasicAgent
 # agent = BasicAgent(vehicle)
-agent = ModelAgent(vehicle,'testing_Xception_1.pt')
+agent = ModelAgent(vehicle,'testing_Xception_ViT_1.pt')
+# agent = 
 
 # Set a random destination
 destination = random.choice(spawn_points).location
@@ -125,7 +126,7 @@ gameDisplay.fill((0,0,0))
 gameDisplay.blit(renderObj.surface, (0,0))
 
 # Initialize Evaluator class
-evaluator_agent = Evaluator(vehicle,agent, destination, max_time=100, world=world)
+evaluator_agent = Evaluator(vehicle,agent, destination, max_time=50, world=world)
 
 pygame.display.flip()
 
