@@ -37,7 +37,7 @@ class ModelAgent(BasicAgent):  # Ensure this inherits from the correct CARLA Age
         processed_image = image[:, :, :3]  # Discard the alpha channel if present.
         return processed_image
 
-    def run_step(self, measurements, sensor_data, directions, target):
+    def run_step(self,sensor_data,measurements=1,directions=1,target=1):
         current_speed = measurements
         input_image = self.process_image(sensor_data)  # Adjust key according to actual data structure.
         input_image = input_image / 255.0  # Normalize the image data.
